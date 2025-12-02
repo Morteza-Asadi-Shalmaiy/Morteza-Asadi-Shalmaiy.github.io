@@ -1,90 +1,120 @@
-// Set launch date (December 31, 2024)
-const launchDate = new Date('December 31, 2024 00:00:00').getTime();
+// Mobile menu toggle
+const menuToggle = document.querySelector('.menu-toggle');
+const navMenu = document.querySelector('.nav-menu');
 
-// Update countdown every second
-const countdownFunction = setInterval(function() {
-    const now = new Date().getTime();
-    const distance = launchDate - now;
-    
-    // Calculate days, hours, minutes, seconds
-    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-    
-    // Display results
-    document.getElementById("days").innerHTML = formatTime(days);
-    document.getElementById("hours").innerHTML = formatTime(hours);
-    document.getElementById("minutes").innerHTML = formatTime(minutes);
-    document.getElementById("seconds").innerHTML = formatTime(seconds);
-    
-    // If countdown is over
-    if (distance < 0) {
-        clearInterval(countdownFunction);
-        document.querySelector(".countdown").innerHTML = "<h2>Website Launched!</h2>";
-    }
-}, 1000);
+menuToggle.addEventListener('click', () => {
+    navMenu.classList.toggle('active');
+    menuToggle.innerHTML = navMenu.classList.contains('active') 
+        ? '<i class="fas fa-times"></i>' 
+        : '<i class="fas fa-bars"></i>';
+});
 
-// Format time to always show 2 digits
-function formatTime(time) {
-    return time < 10 ? `0${time}` : time;
-}
+// Close menu when clicking on a link
+document.querySelectorAll('.nav-menu a').forEach(link => {
+    link.addEventListener('click', () => {
+        navMenu.classList.remove('active');
+        menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+    });
+});
 
-// Set current year in footer
-document.getElementById("current-year").textContent = new Date().getFullYear();
+// Back to top button
+const backToTop = document.querySelector('.back-to-top');
 
-// Form submission handler
-document.getElementById("notify-form").addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const email = document.getElementById('email').value;
-    
-    if (validateEmail(email)) {
-        // In a real application, you would send this to a server
-        // For now, we'll just show a success message
-        showNotification();
-        document.getElementById('email').value = '';
-        
-        // Here you could add code to actually save the email
-        console.log('Email saved for notification:', email);
+window.addEventListener('scroll', () => {
+    if (window.pageYOffset > 300) {
+        backToTop.classList.add('visible');
     } else {
-        alert('Please enter a valid email address.');
+        backToTop.classList.remove('visible');
     }
 });
 
-// Email validation
-function validateEmail(email) {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(email).toLowerCase());
+backToTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Set current year in footer
+document.getElementById('current-year').textContent = new Date().getFullYear();
+
+// Form submission handling
+const contactForm = document.getElementById('contact-form');
+if (contactForm) {
+    contactForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        alert('Thank you for your message! I will get back to you soon.');
+        contactForm.reset();
+    });
 }
 
-// Show notification
-function showNotification() {
-    const notification = document.getElementById('notification');
-    notification.classList.add('show');
-    
-    setTimeout(() => {
-        notification.classList.remove('show');
-    }, 3000);
+// Newsletter form
+const newsletterForm = document.querySelector('.newsletter-form');
+if (newsletterForm) {
+    newsletterForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = newsletterForm.querySelector('input[type="email"]').value;
+        alert(`Thank you for subscribing with ${email}!`);
+        newsletterForm.reset();
+    });
 }
 
-// Add animation on scroll
-document.addEventListener('DOMContentLoaded', function() {
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
+// Animate skill bars on scroll
+const observerOptions = {
+    threshold: 0.5
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const skillLevels = entry.target.querySelectorAll('.skill-level');
+            skillLevels.forEach(level => {
+                // The width is already set inline in HTML
+                // This just triggers the animation
+                level.style.transition = 'width 1s ease-in-out';
+            });
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.skill-category').forEach(category => {
+    observer.observe(category);
+});
+
+// Smooth scrolling for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+            const offsetTop = targetElement.offsetTop - 80;
+            window.scrollTo({
+                top: offsetTop,
+                behavior: 'smooth'
+            });
+        }
+    });
+});
+
+// Add active class to current section in navigation
+const sections = document.querySelectorAll('section');
+const navLinks = document.querySelectorAll('.nav-menu a');
+
+window.addEventListener('scroll', () => {
+    let current = '';
     
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('animate');
-            }
-        });
-    }, observerOptions);
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (scrollY >= (sectionTop - 150)) {
+            current = section.getAttribute('id');
+        }
+    });
     
-    // Observe features for animation
-    document.querySelectorAll('.feature').forEach(feature => {
-        observer.observe(feature);
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+            link.classList.add('active');
+        }
     });
 });
